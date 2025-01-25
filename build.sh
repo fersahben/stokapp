@@ -6,20 +6,23 @@ set -o errexit
 curl -O https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
 tar -xf Python-3.8.0.tgz
 cd Python-3.8.0
-./configure --enable-optimizations
+./configure --prefix=$HOME/.local
 make -j 8
-sudo make altinstall
+make install
 cd ..
 rm -rf Python-3.8.0 Python-3.8.0.tgz
 
+# PATH'e Python'u ekle
+export PATH=$HOME/.local/bin:$PATH
+
 # Python sürümünü kontrol et
-python3.8 --version
+$HOME/.local/bin/python3.8 --version
 
 # pip'i güncelle
-python3.8 -m pip install --upgrade pip
+$HOME/.local/bin/python3.8 -m pip install --upgrade pip
 
 # Gereksinimleri yükle
-python3.8 -m pip install -r requirements.txt
+$HOME/.local/bin/python3.8 -m pip install -r requirements.txt
 
 # Gerekli dizinleri oluştur
 mkdir -p static/uploads
