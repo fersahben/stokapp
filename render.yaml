@@ -2,6 +2,7 @@ services:
   - type: web
     name: stokapp
     env: python
+    runtime: python3.8
     buildCommand: "./build.sh"
     startCommand: "gunicorn app:app"
     envVars:
