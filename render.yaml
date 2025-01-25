@@ -4,7 +4,7 @@ services:
     env: python
     runtime: python3.8
     buildCommand: "./build.sh"
-    startCommand: "gunicorn app:app"
+    startCommand: "/opt/render/.local/bin/gunicorn app:app"
     envVars:
       - key: PYTHON_VERSION
         value: 3.8.0 
