@@ -29,4 +29,7 @@ $HOME/.local/bin/python3.8 -m pip install gunicorn
 
 # Gerekli dizinleri oluştur
 mkdir -p static/uploads
-mkdir -p static/temp 
+mkdir -p static/temp
+
+# start.sh'ı çalıştırılabilir yap
+chmod +x start.sh 
