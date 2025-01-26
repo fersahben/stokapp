@@ -3,8 +3,9 @@
 # pip'i güncelle
 pip install --upgrade pip
 
-# Önce numpy'ı kur
-pip install numpy==1.20.3 --only-binary :all:
+# Önce numpy ve pandas'ı kur
+pip install numpy==1.24.3 --only-binary :all:
+pip install pandas==2.0.3 --only-binary :all:
 
 # Diğer gereksinimleri kur
 pip install -r requirements.txt
