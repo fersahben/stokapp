@@ -3,11 +3,10 @@
 # pip'i güncelle
 pip install --upgrade pip
 
-# Önce numpy ve pandas'ı kur
-pip install numpy==1.24.3 --only-binary :all:
-pip install pandas==2.0.3 --only-binary :all:
+# Sistem paketlerini kur
+apt-get update && apt-get install -y python3-numpy python3-pandas
 
-# Diğer gereksinimleri kur
+# Python paketlerini kur
 pip install -r requirements.txt
 
 # Gerekli dizinleri oluştur

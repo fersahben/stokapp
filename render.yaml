@@ -2,5 +2,6 @@ services:
   - type: web
     name: stokapp
     env: python
+    python_version: 3.9
     buildCommand: chmod +x build.sh && ./build.sh
     startCommand: gunicorn app:app 
