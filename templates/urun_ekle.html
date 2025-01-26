@@ -175,25 +175,32 @@
             // Mobil cihaz kontrolü
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             
+            const constraints = {
+                video: {
+                    facingMode: isMobile ? "environment" : "user",
+                    width: { min: 640, ideal: 1280, max: 1920 },
+                    height: { min: 480, ideal: 720, max: 1080 },
+                    focusMode: "continuous",
+                    exposureMode: "continuous",
+                    whiteBalanceMode: "continuous"
+                }
+            };
+
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: { exact: "environment" },
-                        width: { min: 640, ideal: 1280, max: 1920 },
-                        height: { min: 480, ideal: 720, max: 1080 }
-                    }
-                }).catch(async () => {
-                    // Arka kamera kullanılamıyorsa, herhangi bir kamerayı dene
-                    return await navigator.mediaDevices.getUserMedia({
-                        video: true
+                stream = await navigator.mediaDevices.getUserMedia(constraints)
+                    .catch(async () => {
+                        // Arka kamera kullanılamıyorsa, herhangi bir kamerayı dene
+                        return await navigator.mediaDevices.getUserMedia({
+                            video: true
+                        });
                     });
-                });
 
                 videoElement.srcObject = stream;
+                await videoElement.play();
                 videoElement.style.display = 'block';
                 barkodTaraBtn.innerHTML = '<i class="fas fa-times me-1"></i>Kamerayı Kapat';
 
-                // Her 500ms'de bir barkod tarama (performans için artırıldı)
+                // Her 500ms'de bir barkod tarama
                 const interval = setInterval(async () => {
                     if (!stream) {
                         clearInterval(interval);
@@ -220,10 +227,8 @@
                                 if (response.ok) {
                                     const data = await response.json();
                                     if (data.barkod) {
-                                        // Barkodu input'a yerleştir
                                         barkodInput.value = data.barkod;
                                         
-                                        // Kamerayı kapat
                                         stream.getTracks().forEach(track => track.stop());
                                         stream = null;
                                         videoElement.style.display = 'none';
@@ -234,7 +239,7 @@
                             } catch (error) {
                                 console.error('Barkod tarama hatası:', error);
                             }
-                        }, 'image/jpeg', 0.7); // Kaliteyi düşürerek performansı artır
+                        }, 'image/jpeg', 0.7);
 
                     } catch (error) {
                         console.error('Canvas hatası:', error);
@@ -248,14 +253,14 @@
                 } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
                     alert('Kamera bulunamadı. Lütfen cihazınızda bir kamera olduğundan emin olun.');
                 } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                    alert('Kamera başka bir uygulama tarafından kullanılıyor olabilir.');
+                    alert('Kamera başlatılamadı. Lütfen başka bir uygulamanın kamerayı kullanmadığından emin olun.');
                 } else {
-                    alert('Kamera başlatılırken bir hata oluştu. Lütfen tekrar deneyin.');
+                    alert('Kamera başlatılırken bir hata oluştu: ' + error.message);
                 }
             }
         } catch (error) {
             console.error('Genel hata:', error);
-            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            alert('Bir hata oluştu: ' + error.message);
         }
     });
 </script>

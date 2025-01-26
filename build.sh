@@ -41,4 +41,15 @@ export PATH="/opt/render/project/src/venv/bin:$PATH"
 
 # Gerekli dizinleri oluştur
 mkdir -p static/uploads
+mkdir -p static/temp
+
+# Gerekli sistem paketlerini kur
+apt-get update
+apt-get install -y zbar-tools libzbar0 libzbar-dev
+
+# Python paketlerini kur
+pip install -r requirements.txt
+
+# Gerekli dizinleri oluştur
+mkdir -p static/uploads
 mkdir -p static/temp 
