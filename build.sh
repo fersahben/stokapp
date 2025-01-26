@@ -18,15 +18,24 @@ source venv/bin/activate
 # pip'i güncelle
 pip install --upgrade pip
 
+# Temel paketleri kur
+pip install Flask==2.0.1
+pip install Flask-SQLAlchemy==2.5.1
+pip install Flask-Bootstrap==3.3.7.1
+pip install Werkzeug==2.0.1
+
 # Numpy ve pandas'ı wheel paketleri ile kur
 pip install numpy==1.21.6 --only-binary :all:
 pip install pandas==1.3.5 --only-binary :all:
 
-# Gunicorn'u doğrudan kur
+# Diğer paketleri kur
+pip install opencv-python==4.5.3.56
+pip install pyzbar==0.1.9
+pip install python-barcode==0.14.0
+pip install Pillow==8.3.2
+pip install openpyxl==3.0.9
+pip install et-xmlfile==1.1.0
 pip install gunicorn==20.1.0
-
-# Python paketlerini kur
-pip install -r requirements.txt
 
 # PATH'i ayarla
 export PATH="/opt/render/project/src/venv/bin:$PATH"
