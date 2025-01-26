@@ -3,7 +3,6 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, make_response
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
-import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 import pandas as pd
@@ -239,32 +238,23 @@ def barkod_tara():
     try:
         # Resmi oku
         image_file = request.files['image']
-        nparr = np.frombuffer(image_file.read(), np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        img = Image.open(image_file)
         
         # Görüntü iyileştirme
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        img = img.convert('L')  # Gri tonlamaya çevir
         
-        # Farklı eşik değerleri dene
-        thresholds = [
-            cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1],
-            cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2),
-            gray  # Orijinal gri görüntü
-        ]
+        # Barkod tarama
+        barcodes = decode(img)
         
-        # Her eşik değeri için barkod tarama
-        for thresh in thresholds:
-            barcodes = decode(thresh)
-            if barcodes:
-                # İlk bulunan barkodu döndür
-                barcode = barcodes[0]
-                barkod = barcode.data.decode('utf-8')
-                
-                # Barkodu formatla
-                barkod = barkod_formatla(barkod)
-                
-                return jsonify({'barkod': barkod})
+        if barcodes:
+            # İlk bulunan barkodu döndür
+            barcode = barcodes[0]
+            barkod = barcode.data.decode('utf-8')
+            
+            # Barkodu formatla
+            barkod = barkod_formatla(barkod)
+            
+            return jsonify({'barkod': barkod})
         
         return jsonify({'error': 'Barkod bulunamadı'}), 404
         
