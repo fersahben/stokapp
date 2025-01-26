@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Gerekli sistem paketlerini kur
+apt-get update
+apt-get install -y python3-opencv libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev zbar-tools
+
 # Python 3.9'u kur
 curl -O https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz
 tar -xf Python-3.9.18.tgz
@@ -29,7 +33,7 @@ pip install numpy==1.21.6 --only-binary :all:
 pip install pandas==1.3.5 --only-binary :all:
 
 # Diğer paketleri kur
-pip install opencv-python==4.5.3.56
+pip install opencv-python-headless==4.5.3.56
 pip install pyzbar==0.1.9
 pip install python-barcode==0.14.0
 pip install Pillow==8.3.2
