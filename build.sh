@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Python 3.9'u kur
+curl -O https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz
+tar -xf Python-3.9.18.tgz
+cd Python-3.9.18
+./configure --enable-optimizations
+make -j 8
+make altinstall
+cd ..
+rm -rf Python-3.9.18 Python-3.9.18.tgz
+
+# Virtualenv kur ve etkinleştir
+python3.9 -m pip install virtualenv
+python3.9 -m virtualenv venv
+source venv/bin/activate
+
 # pip'i güncelle
 pip install --upgrade pip
 
