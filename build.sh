@@ -28,8 +28,7 @@ pip install Werkzeug==2.0.1
 pip install numpy==1.21.6 --only-binary :all:
 pip install pandas==1.3.5 --only-binary :all:
 
-# OpenCV ve diğer paketleri kur
-pip install --no-cache-dir opencv-python-headless==4.5.3.56 --only-binary :all:
+# Diğer paketleri kur
 pip install --no-cache-dir pyzbar==0.1.9
 pip install --no-cache-dir python-barcode==0.14.0
 pip install --no-cache-dir Pillow==8.3.2

@@ -14,6 +14,8 @@ from io import BytesIO
 import random
 import base64
 import time
+from PIL import Image
+import io
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 bootstrap = Bootstrap(app)
