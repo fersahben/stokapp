@@ -31,6 +31,9 @@ $HOME/.local/bin/python3.8 -m pip install gunicorn
 mkdir -p static/uploads
 mkdir -p static/temp
 
+# Gunicorn için sembolik bağlantı oluştur
+ln -sf $HOME/.local/bin/gunicorn /usr/local/bin/gunicorn
+
 # start.sh'ı çalıştırılabilir yap
 chmod +x start.sh
 
