@@ -15,6 +15,7 @@ import base64
 import time
 from PIL import Image
 import io
+from PIL import ImageEnhance
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 bootstrap = Bootstrap(app)
@@ -243,8 +244,33 @@ def barkod_tara():
         # Görüntü iyileştirme
         img = img.convert('L')  # Gri tonlamaya çevir
         
+        # Görüntüyü keskinleştir
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(2.0)  # Keskinliği artır
+        
+        # Kontrastı artır
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.5)
+        
+        # Görüntüyü büyüt
+        width, height = img.size
+        img = img.resize((int(width * 1.5), int(height * 1.5)), Image.Resampling.LANCZOS)
+        
         # Barkod tarama
         barcodes = decode(img)
+        
+        if not barcodes:
+            # Farklı bir yöntemle tekrar dene
+            img = img.rotate(90)  # 90 derece döndür
+            barcodes = decode(img)
+            
+            if not barcodes:
+                img = img.rotate(90)  # 180 derece döndür
+                barcodes = decode(img)
+                
+                if not barcodes:
+                    img = img.rotate(90)  # 270 derece döndür
+                    barcodes = decode(img)
         
         if barcodes:
             # İlk bulunan barkodu döndür
@@ -254,12 +280,14 @@ def barkod_tara():
             # Barkodu formatla
             barkod = barkod_formatla(barkod)
             
+            print(f"Barkod bulundu: {barkod}")  # Debug için
             return jsonify({'barkod': barkod})
         
+        print("Barkod bulunamadı")  # Debug için
         return jsonify({'error': 'Barkod bulunamadı'}), 404
         
     except Exception as e:
-        print(f"Barkod tarama hatası: {str(e)}")  # Hata ayıklama için
+        print(f"Barkod tarama hatası: {str(e)}")  # Debug için
         return jsonify({'error': str(e)}), 500
 
 # Excel indirme
