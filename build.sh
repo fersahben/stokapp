@@ -22,11 +22,14 @@ pip install --upgrade pip
 pip install numpy==1.21.6 --only-binary :all:
 pip install pandas==1.3.5 --only-binary :all:
 
+# Gunicorn'u doğrudan kur
+pip install gunicorn==20.1.0
+
 # Python paketlerini kur
 pip install -r requirements.txt
 
 # PATH'i ayarla
-export PATH="/opt/render/project/src/.local/bin:$PATH"
+export PATH="/opt/render/project/src/venv/bin:$PATH"
 
 # Gerekli dizinleri oluştur
 mkdir -p static/uploads
