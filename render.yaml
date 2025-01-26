@@ -2,9 +2,5 @@ services:
   - type: web
     name: stokapp
     env: python
-    runtime: python3.8
-    buildCommand: "./build.sh"
-    startCommand: "./start.sh"
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.8.0 
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app 
