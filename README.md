@@ -46,9 +46,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Veritabanını oluşturun:
-```bash
-python app.py
+4. Python konsolunda veritabanını oluşturun:
+```python
+python
+>>> from app import db
+>>> db.create_all()
+>>> exit()
 ```
 
 5. Uygulamayı başlatın:
