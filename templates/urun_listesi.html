@@ -114,299 +114,282 @@
             font-size: 1.5rem;
         }
     }
+
+    .info-box {
+        padding: 15px;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    .info-box h5 {
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    .info-box h3 {
+        color: #0d6efd;
+        margin: 0;
+    }
+
+    .barcode-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .barcode-text {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .barcode-svg {
+        max-width: 120px;
+        height: 40px;
+    }
+    
+    @media (max-width: 768px) {
+        .barcode-svg {
+            max-width: 100px;
+            height: 30px;
+        }
+        
+        .barcode-text {
+            font-size: 0.7rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Ürün Listesi</h4>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-primary" id="barkod-tara-btn">
-                <i class="fas fa-barcode me-1"></i>Barkod Tara
-            </button>
-            <a href="{{ url_for('urun_ekle') }}" class="btn btn-success">
-                <i class="fas fa-plus me-1"></i>Yeni Ürün
-            </a>
-            <div class="btn-group">
-                <a href="{{ url_for('excel_indir') }}" class="btn btn-secondary">
-                    <i class="fas fa-download me-1"></i>Excel İndir
-                </a>
-                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#excelYukleModal">
-                    <i class="fas fa-upload me-1"></i>Excel Yükle
-                </button>
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h2>Ürün Listesi</h2>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-warning" id="barkod-tara-btn">
+                        <i class="fas fa-barcode"></i> Barkod Oku
+                    </button>
+                    <form action="{{ url_for('excel_yukle') }}" method="post" enctype="multipart/form-data" class="d-inline">
+                        <input type="file" name="excel_file" id="excel_file" class="d-none" accept=".xlsx">
+                        <button type="button" class="btn btn-success" onclick="document.getElementById('excel_file').click()">
+                            <i class="fas fa-file-upload"></i> Excel Yükle
+                        </button>
+                    </form>
+                    <a href="{{ url_for('excel_indir') }}" class="btn btn-info">
+                        <i class="fas fa-file-download"></i> Excel İndir
+                    </a>
+                    <a href="{{ url_for('urun_ekle') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Yeni Ürün
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-    <div class="card-body">
-        <div id="kamera-alani">
-            <video id="video-preview"></video>
-        </div>
-        
-        <div class="mb-3">
-            <input type="text" class="form-control search-box" id="urun-ara" placeholder="Barkod veya ürün adı ile ara...">
-        </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th class="text-center">Resim</th>
-                        <th class="text-center">Barkod</th>
-                        <th class="text-center">Ürün Adı</th>
-                        <th class="text-center">Miktar</th>
-                        <th class="text-center">Fiyat</th>
-                        <th class="text-center">İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for urun in urunler %}
-                    <tr>
-                        <td class="text-center">
-                            {% if urun.resim_url %}
-                            <img src="{{ url_for('static', filename=urun.resim_url) }}" alt="{{ urun.ad }}" class="table-image">
-                            {% else %}
-                            <i class="fas fa-image text-muted"></i>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="text-center">
-                                <div class="barcode-text">{{ '%012d' % urun.barkod|int }}</div>
-                                <small class="text-muted d-block mt-2">{{ urun.barkod }}</small>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <input type="text" class="form-control" id="urun-ara" placeholder="Ürün adı veya barkod ile ara...">
+        </div>
+    </div>
+
+    <div id="kamera-alani" class="text-center mb-3" style="display: none;">
+        <video id="video-preview" playsinline autoplay></video>
+    </div>
+
+    <div class="table-responsive mb-4">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Barkod</th>
+                    <th>Ürün Adı</th>
+                    <th>Miktar</th>
+                    <th>Fiyat</th>
+                    <th>Toplam Değer</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for urun in urunler %}
+                <tr>
+                    <td>
+                        <div class="barcode-container">
+                            <svg class="barcode-svg" data-barcode="{{ urun.barkod }}"></svg>
+                            <span class="barcode-text">{{ urun.barkod }}</span>
+                        </div>
+                    </td>
+                    <td>{{ urun.ad }}</td>
+                    <td>{{ urun.miktar }}</td>
+                    <td>{{ "%.2f"|format(urun.fiyat) }} TL</td>
+                    <td>{{ "%.2f"|format(urun.miktar * urun.fiyat) }} TL</td>
+                    <td class="actions">
+                        <a href="{{ url_for('urun_duzenle', id=urun.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ url_for('urun_sil', id=urun.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <h5>Toplam Ürün Sayısı</h5>
+                                <div class="h3">{{ toplam_urun_sayisi }}</div>
                             </div>
-                        </td>
-                        <td>{{ urun.ad }}</td>
-                        <td class="text-center">{{ urun.miktar }}</td>
-                        <td class="text-center">{{ "%.2f"|format(urun.fiyat) }} ₺</td>
-                        <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('urun_duzenle', id=urun.id) }}" class="btn btn-primary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button onclick="urunSil({{ urun.id }})" class="btn btn-danger">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <h5>Toplam Ürün Miktarı</h5>
+                                <div class="h3">{{ toplam_urun_miktari }}</div>
                             </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <div class="stat-card">
-            <h5>Toplam Ürün Sayısı</h5>
-            <p class="h3">{{ toplam_urun_sayisi }}</p>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card">
-            <h5>Toplam Ürün Miktarı</h5>
-            <p class="h3">{{ toplam_urun_miktari }}</p>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card">
-            <h5>Toplam Stok Değeri</h5>
-            <p class="h3">{{ "%.2f"|format(toplam_stok_degeri) }} ₺</p>
-        </div>
-    </div>
-</div>
-
-<!-- Excel Yükleme Modal -->
-<div class="modal fade" id="excelYukleModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Excel Dosyası Yükle</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ url_for('excel_yukle') }}" method="post" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="excel_file" class="form-label">Excel Dosyası Seçin</label>
-                        <input type="file" class="form-control" id="excel_file" name="excel_file" accept=".xlsx,.xls" required>
-                        <small class="text-muted">Excel dosyanız şu sütunları içermelidir: Barkod, Ürün Adı, Miktar, Fiyat</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <h5>Toplam Stok Değeri</h5>
+                                <div class="h3">{{ "%.2f"|format(toplam_stok_degeri) }} TL</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary">Yükle</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script>
-    // Ürün silme fonksiyonu
-    function urunSil(id) {
-        if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
-            fetch(`/urun/${id}/sil`, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Ürün silinirken bir hata oluştu!');
-                    }
-                });
-        }
+document.getElementById('excel_file').addEventListener('change', function() {
+    if (this.files.length > 0) {
+        this.form.submit();
     }
+});
 
-    // Ürün arama fonksiyonu
-    document.getElementById('urun-ara').addEventListener('input', function(e) {
-        const aranan = e.target.value.toLowerCase();
-        document.querySelectorAll('tbody tr').forEach(tr => {
-            const barkod = tr.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            const urunAdi = tr.querySelector('td:nth-child(3)').textContent.toLowerCase();
-            tr.style.display = barkod.includes(aranan) || urunAdi.includes(aranan) ? '' : 'none';
-        });
+// Ürün arama
+document.getElementById('urun-ara').addEventListener('input', function(e) {
+    const aranan = e.target.value.toLowerCase();
+    document.querySelectorAll('tbody tr').forEach(tr => {
+        const barkod = tr.querySelector('td:nth-child(1)').textContent.toLowerCase();
+        const urunAdi = tr.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        tr.style.display = barkod.includes(aranan) || urunAdi.includes(aranan) ? '' : 'none';
     });
+});
 
-    // Barkod tarama işlemleri
-    let stream = null;
-    const videoElement = document.getElementById('video-preview');
-    const barkodTaraBtn = document.getElementById('barkod-tara-btn');
-    const kameraAlani = document.getElementById('kamera-alani');
+// Barkod tarama
+let videoStream;
+const barkodTaraBtn = document.getElementById('barkod-tara-btn');
+const videoPreview = document.getElementById('video-preview');
+const kameraAlani = document.getElementById('kamera-alani');
 
-    barkodTaraBtn.addEventListener('click', async () => {
-        try {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-                videoElement.style.display = 'none';
-                barkodTaraBtn.innerHTML = '<i class="fas fa-barcode me-1"></i>Barkod Tara';
+barkodTaraBtn.addEventListener('click', async () => {
+    try {
+        if (videoStream) {
+            // Kamera zaten açıksa kapat
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+            videoPreview.style.display = 'none';
+            kameraAlani.style.display = 'none';
+            barkodTaraBtn.innerHTML = '<i class="fas fa-barcode"></i> Barkod Oku';
+            return;
+        }
+
+        // Kamerayı aç
+        videoStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment' }
+        });
+        videoPreview.srcObject = videoStream;
+        videoPreview.style.display = 'block';
+        kameraAlani.style.display = 'block';
+        videoPreview.play();
+        barkodTaraBtn.innerHTML = '<i class="fas fa-times"></i> Kamerayı Kapat';
+
+        // Her 500ms'de bir görüntü yakalayıp barkod tara
+        const taramaInterval = setInterval(async () => {
+            if (!videoStream) {
+                clearInterval(taramaInterval);
                 return;
             }
 
-            // Mobil cihaz kontrolü
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: { exact: "environment" },
-                        width: { min: 640, ideal: 1280, max: 1920 },
-                        height: { min: 480, ideal: 720, max: 1080 },
-                        focusMode: "continuous",
-                        exposureMode: "continuous",
-                        whiteBalanceMode: "continuous"
-                    }
-                }).catch(async () => {
-                    // Arka kamera kullanılamıyorsa, herhangi bir kamerayı dene
-                    return await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { min: 640, ideal: 1280, max: 1920 },
-                            height: { min: 480, ideal: 720, max: 1080 },
-                            focusMode: "continuous",
-                            exposureMode: "continuous",
-                            whiteBalanceMode: "continuous"
-                        }
+            const canvas = document.createElement('canvas');
+            canvas.width = videoPreview.videoWidth;
+            canvas.height = videoPreview.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoPreview, 0, 0);
+
+            // Görüntüyü blob'a çevir
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('image', blob);
+
+                try {
+                    // Barkodu tara
+                    const response = await fetch('/barkod/tara', {
+                        method: 'POST',
+                        body: formData
                     });
-                });
 
-                videoElement.srcObject = stream;
-                await videoElement.play();
-                videoElement.style.display = 'block';
-                barkodTaraBtn.innerHTML = '<i class="fas fa-times me-1"></i>Kamerayı Kapat';
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.barkod) {
+                            // Barkod bulundu, ürün kontrolü yap
+                            const kontrolResponse = await fetch(`/urun/barkod/${data.barkod}/kontrol`);
+                            const kontrolData = await kontrolResponse.json();
 
-                // Her 500ms'de bir barkod tarama
-                const interval = setInterval(async () => {
-                    if (!stream) {
-                        clearInterval(interval);
-                        return;
-                    }
-
-                    try {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = videoElement.videoWidth;
-                        canvas.height = videoElement.videoHeight;
-                        const context = canvas.getContext('2d');
-                        
-                        // Görüntüyü döndür (mobil cihazlar için)
-                        if (isMobile && window.innerWidth < window.innerHeight) {
-                            context.translate(canvas.width, 0);
-                            context.rotate(90 * Math.PI / 180);
-                        }
-                        
-                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-                        canvas.toBlob(async (blob) => {
-                            const formData = new FormData();
-                            formData.append('image', blob);
-
-                            try {
-                                const response = await fetch('/barkod/tara', {
-                                    method: 'POST',
-                                    body: formData
+                            if (kontrolData.exists) {
+                                // Ürün varsa miktarını artır
+                                const artirResponse = await fetch(`/urun/${kontrolData.id}/miktar-artir`, {
+                                    method: 'POST'
                                 });
-
-                                if (response.ok) {
-                                    const data = await response.json();
-                                    if (data.barkod) {
-                                        // Barkod bulunduğunda ürün kontrolü yap
-                                        const urunKontrolResponse = await fetch(`/urun/barkod/${data.barkod}/kontrol`);
-                                        const urunData = await urunKontrolResponse.json();
-                                        
-                                        if (urunData.exists) {
-                                            // Ürün varsa miktarını artır
-                                            const updateResponse = await fetch(`/urun/${urunData.id}/miktar-artir`, {
-                                                method: 'POST'
-                                            });
-                                            if (updateResponse.ok) {
-                                                // Başarılı bildirim göster
-                                                alert('Ürün miktarı artırıldı!');
-                                                location.reload();
-                                            }
-                                        } else {
-                                            // Ürün yoksa yeni ürün ekleme sayfasına yönlendir
-                                            window.location.href = `/urun/ekle?barkod=${data.barkod}`;
-                                        }
-                                        
-                                        // Kamerayı kapat
-                                        stream.getTracks().forEach(track => track.stop());
-                                        stream = null;
-                                        videoElement.style.display = 'none';
-                                        barkodTaraBtn.innerHTML = '<i class="fas fa-barcode me-1"></i>Barkod Tara';
-                                        clearInterval(interval);
-                                    }
-                                } else {
-                                    const errorData = await response.json();
-                                    console.error('Barkod tarama hatası:', errorData.error);
+                                if (artirResponse.ok) {
+                                    location.reload();
                                 }
-                            } catch (error) {
-                                console.error('Barkod tarama hatası:', error);
+                            } else {
+                                // Ürün yoksa yeni ürün ekleme sayfasına yönlendir
+                                window.location.href = `/urun/ekle?barkod=${data.barkod}`;
                             }
-                        }, 'image/jpeg', 0.95); // Kaliteyi artır
 
-                    } catch (error) {
-                        console.error('Canvas hatası:', error);
+                            // Kamerayı kapat
+                            videoStream.getTracks().forEach(track => track.stop());
+                            videoStream = null;
+                            videoPreview.style.display = 'none';
+                            kameraAlani.style.display = 'none';
+                            barkodTaraBtn.innerHTML = '<i class="fas fa-barcode"></i> Barkod Oku';
+                            clearInterval(taramaInterval);
+                        }
                     }
-                }, 500);
-
-            } catch (error) {
-                console.error('Kamera hatası:', error);
-                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                    alert('Kamera izni verilmedi. Lütfen kamera izni verin ve tekrar deneyin.');
-                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                    alert('Kamera bulunamadı. Lütfen cihazınızda bir kamera olduğundan emin olun.');
-                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                    alert('Kamera başka bir uygulama tarafından kullanılıyor olabilir.');
-                } else {
-                    alert('Kamera başlatılırken bir hata oluştu. Lütfen tekrar deneyin.');
+                } catch (error) {
+                    console.error('Barkod tarama hatası:', error);
                 }
-            }
-        } catch (error) {
-            console.error('Genel hata:', error);
-            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
-        }
+            }, 'image/jpeg');
+        }, 500);
+
+    } catch (error) {
+        console.error('Kamera açma hatası:', error);
+        alert('Kamera açılırken bir hata oluştu. Lütfen kamera izinlerini kontrol edin.');
+    }
+});
+
+// Barkodları oluştur
+document.querySelectorAll('[data-barcode]').forEach(element => {
+    JsBarcode(element, element.dataset.barcode, {
+        format: "CODE128",
+        width: 1.5,
+        height: 40,
+        displayValue: false,
+        margin: 0,
+        background: "transparent"
     });
+});
 </script>
 {% endblock %} 

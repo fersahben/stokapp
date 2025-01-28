@@ -40,11 +40,16 @@
         .form-control {
             font-size: 1rem;
             padding: 0.4rem 0.6rem;
+            height: 40px;
         }
         
         .btn {
             width: 100%;
             margin-bottom: 0.5rem;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .text-muted {
@@ -53,11 +58,36 @@
         
         #video-preview {
             height: 250px;
+            width: 100%;
+            max-width: 100%;
+            margin: 0.5rem 0;
         }
         
         .preview-image {
             max-width: 150px;
             max-height: 150px;
+        }
+        
+        .input-group {
+            flex-direction: column;
+        }
+        
+        .input-group > .form-control {
+            border-radius: 4px !important;
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group > .btn {
+            border-radius: 4px !important;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
         }
     }
     
@@ -71,197 +101,246 @@
             padding: 0.4rem 0.8rem;
         }
     }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffecb5;
+        color: #664d03;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+    
+    .alert-warning .btn-link {
+        padding: 0;
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .alert-warning .btn-link:hover {
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+        .alert-warning {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title mb-0">Yeni Ürün Ekle</h3>
-            </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data" id="urun-form">
-                    <div class="row mb-3">
-                        <div class="col-md-9">
-                            <label for="barkod" class="form-label">Barkod</label>
-                            <input type="text" class="form-control" id="barkod" name="barkod" pattern="\d*" minlength="12" maxlength="12" value="{{ request.args.get('barkod', '') }}">
-                            <small class="text-muted">12 haneli barkod numarası girin veya boş bırakın. Boş bırakırsanız otomatik oluşturulacaktır.</small>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="button" class="btn btn-primary w-100" id="barkod-tara">
-                                <i class="fas fa-barcode me-1"></i>Barkod Tara
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="kamera-alani">
-                        <video id="video-preview"></video>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="ad" class="form-label">Ürün Adı</label>
-                        <input type="text" class="form-control" id="ad" name="ad" required>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="miktar" class="form-label">Miktar</label>
-                            <input type="number" class="form-control" id="miktar" name="miktar" required min="0" value="0">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="fiyat" class="form-label">Fiyat (TL)</label>
-                            <input type="number" class="form-control" id="fiyat" name="fiyat" required min="0" step="0.01" value="0.00">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="resim" class="form-label">Ürün Fotoğrafı</label>
-                        <input type="file" class="form-control" id="resim" name="resim" accept="image/*">
-                        <div id="resim-onizleme" class="text-center"></div>
-                    </div>
-
-                    <div class="text-end">
-                        <a href="{{ url_for('urun_listesi') }}" class="btn btn-secondary me-2">
-                            <i class="fas fa-times me-1"></i>İptal
-                        </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save me-1"></i>Kaydet
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="container">
+    <h2>Yeni Ürün Ekle</h2>
+    
+    <div id="barkod-uyari" class="alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Bu barkoda sahip bir ürün zaten mevcut:
+        <strong id="mevcut-urun-adi"></strong>
+        <br>
+        <small class="text-muted">Mevcut Miktar: <span id="mevcut-urun-miktar"></span>, Fiyat: <span id="mevcut-urun-fiyat"></span> TL</small>
+        <br>
+        <a href="#" id="urun-duzenle-link" class="btn-link">Ürünü düzenlemek için tıklayın</a>
     </div>
+
+    <form method="POST" id="urun-form">
+        <div class="form-group">
+            <label for="barkod">Barkod <small class="text-muted">(Opsiyonel)</small></label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="barkod" name="barkod" value="{{ request.args.get('barkod', '') }}">
+                <button type="button" class="btn btn-warning" id="barkod-tara">
+                    <i class="fas fa-barcode"></i> Barkod Tara
+                </button>
+            </div>
+            <small class="text-muted">Boş bırakırsanız otomatik barkod oluşturulacaktır.</small>
+        </div>
+
+        <div id="kamera-alani" class="text-center mb-3" style="display: none;">
+            <video id="video-preview" playsinline autoplay></video>
+        </div>
+
+        <div class="form-group">
+            <label for="ad">Ürün Adı</label>
+            <input type="text" class="form-control" id="ad" name="ad" required>
+        </div>
+        <div class="form-group">
+            <label for="miktar">Miktar</label>
+            <input type="number" class="form-control" id="miktar" name="miktar" value="1" required>
+        </div>
+        <div class="form-group">
+            <label for="fiyat">Fiyat</label>
+            <input type="number" step="0.01" class="form-control" id="fiyat" name="fiyat" required>
+        </div>
+        <div class="form-group mt-4">
+            <button type="submit" class="btn btn-primary">Ekle</button>
+            <a href="{{ url_for('urun_listesi') }}" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Resim önizleme
-    document.getElementById('resim').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const preview = document.getElementById('resim-onizleme');
-        
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
-            }
-            reader.readAsDataURL(file);
-        } else {
-            preview.innerHTML = '';
-        }
-    });
-
-    // Barkod tarama
     let stream = null;
     const videoElement = document.getElementById('video-preview');
     const barkodTaraBtn = document.getElementById('barkod-tara');
     const kameraAlani = document.getElementById('kamera-alani');
     const barkodInput = document.getElementById('barkod');
+    const barkodUyari = document.getElementById('barkod-uyari');
+    const mevcutUrunAdi = document.getElementById('mevcut-urun-adi');
+    const mevcutUrunMiktar = document.getElementById('mevcut-urun-miktar');
+    const mevcutUrunFiyat = document.getElementById('mevcut-urun-fiyat');
+    const urunDuzenleLink = document.getElementById('urun-duzenle-link');
+    const urunForm = document.getElementById('urun-form');
 
-    barkodTaraBtn.addEventListener('click', async () => {
+    // Barkod değiştiğinde kontrol et
+    async function barkodKontrol(barkod) {
+        try {
+            const response = await fetch(`/urun/barkod/${barkod}/kontrol`);
+            const data = await response.json();
+            
+            if (data.exists) {
+                mevcutUrunAdi.textContent = data.ad;
+                mevcutUrunMiktar.textContent = data.miktar;
+                mevcutUrunFiyat.textContent = data.fiyat.toFixed(2);
+                urunDuzenleLink.href = `/urun/duzenle/${data.id}`;
+                barkodUyari.style.display = 'block';
+                return true;
+            } else {
+                barkodUyari.style.display = 'none';
+                return false;
+            }
+        } catch (error) {
+            console.error('Barkod kontrol hatası:', error);
+            return false;
+        }
+    }
+
+    // Barkod input değiştiğinde kontrol et
+    barkodInput.addEventListener('input', async (e) => {
+        if (e.target.value.length > 0) {
+            await barkodKontrol(e.target.value);
+        } else {
+            barkodUyari.style.display = 'none';
+        }
+    });
+
+    // Form gönderilmeden önce kontrol et
+    urunForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const barkod = barkodInput.value;
+        
+        if (await barkodKontrol(barkod)) {
+            if (!confirm('Bu barkoda sahip bir ürün zaten mevcut. Yine de yeni ürün eklemek istiyor musunuz?')) {
+                return;
+            }
+        }
+        
+        e.target.submit();
+    });
+
+    async function startBarcodeScanning() {
         try {
             if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-                videoElement.style.display = 'none';
-                barkodTaraBtn.innerHTML = '<i class="fas fa-barcode me-1"></i>Barkod Tara';
+                stopCamera();
                 return;
             }
 
-            // Mobil cihaz kontrolü
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            
             const constraints = {
                 video: {
-                    facingMode: isMobile ? "environment" : "user",
-                    width: { min: 640, ideal: 1280, max: 1920 },
-                    height: { min: 480, ideal: 720, max: 1080 },
-                    focusMode: "continuous",
-                    exposureMode: "continuous",
-                    whiteBalanceMode: "continuous"
+                    facingMode: { exact: "environment" },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
                 }
             };
 
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoElement.srcObject = stream;
+            videoElement.style.display = 'block';
+            kameraAlani.style.display = 'block';
+            await videoElement.play();
+            barkodTaraBtn.innerHTML = '<i class="fas fa-times"></i> Kamerayı Kapat';
+
+            scanBarcode();
+        } catch (error) {
+            console.error('Kamera hatası:', error);
             try {
-                stream = await navigator.mediaDevices.getUserMedia(constraints)
-                    .catch(async () => {
-                        // Arka kamera kullanılamıyorsa, herhangi bir kamerayı dene
-                        return await navigator.mediaDevices.getUserMedia({
-                            video: true
-                        });
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user" }
+                });
+                videoElement.srcObject = stream;
+                videoElement.style.display = 'block';
+                kameraAlani.style.display = 'block';
+                await videoElement.play();
+                barkodTaraBtn.innerHTML = '<i class="fas fa-times"></i> Kamerayı Kapat';
+
+                scanBarcode();
+            } catch (err) {
+                console.error('Ön kamera hatası:', err);
+                alert('Kamera açılamadı. Lütfen kamera izinlerini kontrol edin.');
+            }
+        }
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            videoElement.style.display = 'none';
+            kameraAlani.style.display = 'none';
+            barkodTaraBtn.innerHTML = '<i class="fas fa-barcode"></i> Barkod Tara';
+        }
+    }
+
+    function scanBarcode() {
+        const interval = setInterval(async () => {
+            if (!stream) {
+                clearInterval(interval);
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0);
+
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('image', blob);
+
+                try {
+                    const response = await fetch('/barkod/tara', {
+                        method: 'POST',
+                        body: formData
                     });
 
-                videoElement.srcObject = stream;
-                await videoElement.play();
-                videoElement.style.display = 'block';
-                barkodTaraBtn.innerHTML = '<i class="fas fa-times me-1"></i>Kamerayı Kapat';
-
-                // Her 500ms'de bir barkod tarama
-                const interval = setInterval(async () => {
-                    if (!stream) {
-                        clearInterval(interval);
-                        return;
-                    }
-
-                    try {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = videoElement.videoWidth;
-                        canvas.height = videoElement.videoHeight;
-                        const context = canvas.getContext('2d');
-                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-                        canvas.toBlob(async (blob) => {
-                            const formData = new FormData();
-                            formData.append('image', blob);
-
-                            try {
-                                const response = await fetch('/barkod/tara', {
-                                    method: 'POST',
-                                    body: formData
-                                });
-
-                                if (response.ok) {
-                                    const data = await response.json();
-                                    if (data.barkod) {
-                                        barkodInput.value = data.barkod;
-                                        
-                                        stream.getTracks().forEach(track => track.stop());
-                                        stream = null;
-                                        videoElement.style.display = 'none';
-                                        barkodTaraBtn.innerHTML = '<i class="fas fa-barcode me-1"></i>Barkod Tara';
-                                        clearInterval(interval);
-                                    }
-                                }
-                            } catch (error) {
-                                console.error('Barkod tarama hatası:', error);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.barkod) {
+                            barkodInput.value = data.barkod;
+                            await barkodKontrol(data.barkod);
+                            stopCamera();
+                            clearInterval(interval);
+                            // Titreşim ile geri bildirim
+                            if (navigator.vibrate) {
+                                navigator.vibrate(200);
                             }
-                        }, 'image/jpeg', 0.7);
-
-                    } catch (error) {
-                        console.error('Canvas hatası:', error);
+                        }
                     }
-                }, 500);
-
-            } catch (error) {
-                console.error('Kamera hatası:', error);
-                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                    alert('Kamera izni verilmedi. Lütfen kamera izni verin ve tekrar deneyin.');
-                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                    alert('Kamera bulunamadı. Lütfen cihazınızda bir kamera olduğundan emin olun.');
-                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                    alert('Kamera başlatılamadı. Lütfen başka bir uygulamanın kamerayı kullanmadığından emin olun.');
-                } else {
-                    alert('Kamera başlatılırken bir hata oluştu: ' + error.message);
+                } catch (error) {
+                    console.error('Barkod tarama hatası:', error);
                 }
-            }
-        } catch (error) {
-            console.error('Genel hata:', error);
-            alert('Bir hata oluştu: ' + error.message);
-        }
-    });
+            }, 'image/jpeg', 0.7);
+        }, 500);
+    }
+
+    barkodTaraBtn.addEventListener('click', startBarcodeScanning);
+
+    // Sayfa kapatıldığında kamerayı kapat
+    window.addEventListener('beforeunload', stopCamera);
 </script>
 {% endblock %} 

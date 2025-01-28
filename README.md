@@ -1,91 +1,95 @@
-# Stok Yönetim Sistemi
+# Stok Takip Uygulaması
 
-Modern ve kullanıcı dostu bir stok yönetim uygulaması. Barkod okuma, Excel entegrasyonu ve resim yönetimi özellikleri ile stok takibini kolaylaştırır.
+Bu uygulama, küçük işletmeler için geliştirilmiş basit ve kullanışlı bir stok takip sistemidir. Mobil cihazlarla uyumlu olup, barkod okuma özelliği ile hızlı ürün girişi ve takibi sağlar.
 
 ## Özellikler
 
-### Temel Özellikler
-- Ürün ekleme, düzenleme ve silme
-- Barkod tarama ile hızlı ürün arama ve miktar artırma
-- Excel ile toplu ürün içe/dışa aktarma
-- Ürün resmi yükleme ve görüntüleme
-- Anlık arama filtreleme
-- Mobil uyumlu responsive tasarım
-
-### Barkod Özellikleri
-- Kamera ile barkod tarama (mobil cihaz desteği)
-- Otomatik barkod oluşturma
-- Libre Barcode 128 fontu ile görsel barkod gösterimi
-- EAN-13 formatı desteği
-
-### Excel İşlemleri
-- Ürünleri Excel'e aktarma
-- Excel'den ürün yükleme
-- Resim verilerini base64 formatında saklama
-- Otomatik resim dönüştürme ve geri yükleme
-
-### Stok Takibi
-- Toplam ürün sayısı istatistikleri
-- Toplam ürün miktarı takibi
-- Toplam stok değeri hesaplama
+- 📱 Mobil uyumlu tasarım
+- 📷 Kamera ile barkod okuma
+- 🔄 Otomatik barkod oluşturma
+- 📊 Stok istatistikleri
+- 📥 Excel ile toplu ürün içe aktarma
+- 📤 Excel ile ürün dışa aktarma
+- 🔍 Anlık ürün arama
+- ✏️ Ürün düzenleme ve silme
+- 📊 Toplam stok değeri takibi
 
 ## Kurulum
 
-1. Gerekli Python paketlerini yükleyin:
+### Gereksinimler
+
+- Python 3.8 veya üzeri
+- pip (Python paket yöneticisi)
+- Kamera erişimi (barkod okuma için)
+
+### Adımlar
+
+1. Projeyi klonlayın:
+```bash
+git clone https://github.com/kullanici_adi/stok-takip.git
+cd stok-takip
+```
+
+2. Sanal ortam oluşturun ve aktif edin:
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# Linux/macOS
+python3 -m venv venv
+source venv/bin/activate
+```
+
+3. Gerekli paketleri yükleyin:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Veritabanını oluşturun:
-```python
-from app import db
-db.create_all()
-```
-
-3. Uygulamayı başlatın:
+4. Veritabanını oluşturun:
 ```bash
 python app.py
 ```
 
+5. Uygulamayı başlatın:
+```bash
+python app.py
+```
+
+Uygulama http://localhost:5000 adresinde çalışmaya başlayacaktır.
+
 ## Kullanım
 
-### Ürün Ekleme
-1. "Yeni Ürün" butonuna tıklayın
-2. Barkodu manuel girin veya "Barkod Tara" ile otomatik okutun
-3. Ürün bilgilerini doldurun
-4. İsterseniz ürün fotoğrafı ekleyin
-5. Kaydet butonuna basın
+### Yeni Ürün Ekleme
+- "Yeni Ürün" butonuna tıklayın
+- Barkodu okutun veya manuel girin (boş bırakırsanız otomatik oluşturulur)
+- Ürün bilgilerini doldurun
+- "Ekle" butonuna tıklayın
 
-### Barkod Tarama
-1. Ana sayfada "Barkod Tara" butonuna tıklayın
-2. Kamera izni verin
-3. Barkodu kameraya gösterin
-4. Barkod otomatik okunacak ve işlem yapılacaktır
+### Barkod Okutma
+- "Barkod Oku" butonuna tıklayın
+- Kamera açıldığında barkodu gösterin
+- Barkod okunduğunda otomatik olarak işlem yapılacaktır
 
 ### Excel İşlemleri
-1. **Dışa Aktarma**
-   - "Excel İndir" butonuna tıklayın
-   - Tüm ürünler ve resimleri Excel dosyasına kaydedilecektir
+- Toplu ürün eklemek için Excel şablonunu indirin
+- Şablonu doldurup "Excel Yükle" ile içe aktarın
+- Mevcut ürünleri dışa aktarmak için "Excel İndir" butonunu kullanın
 
-2. **İçe Aktarma**
-   - "Excel Yükle" butonuna tıklayın
-   - Excel dosyanızı seçin
-   - Ürünler ve resimler otomatik içe aktarılacaktır
+## Güvenlik
 
-## Güvenlik Notları
-- Debug modunu production ortamında kapatın
-- SECRET_KEY değerini değiştirin
-- Yüklenen dosya boyutlarını kontrol edin
-- Hassas verileri SSL/TLS ile koruyun
+- Uygulama yerel ağda çalışır
+- Veritabanı SQLite kullanır
+- Hassas veriler şifrelenmez
 
-## Mobil Kullanım
-- Uygulama mobil tarayıcılarda tam uyumlu çalışır
-- Kamera erişimi için HTTPS gerekebilir
-- Arka kamera otomatik tercih edilir
-- Responsive tasarım ile tüm ekranlarda uyumlu görüntüleme
+## Teknik Detaylar
+
+- Flask web framework
+- SQLite veritabanı
+- Bootstrap 5 arayüz
+- JavaScript barkod okuma
+- Responsive tasarım
 
 ## Lisans
-MIT License
 
-## İletişim
-Sorun ve önerileriniz için Issues bölümünü kullanabilirsiniz. 
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın. 
